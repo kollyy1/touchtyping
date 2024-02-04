@@ -61,19 +61,27 @@ int main(){
     //intro screen
     addstr("---------------------------\n|     Asher's amazing     |\n"
            "| touch-typing challenge! |\n---------------------------\n\n");
-    addstr("enter the number of rounds you want to play (max 999)\nin a three-digit format (i.e 005, 042 or 247)     (max = 999)\n");
-    refresh();
     char strIn[4];
-    for (int i = 0; i < 3; i++){
-        strIn[i] = getch();
-    }
-    strIn[3] = '\0';
-    int rounds = atoi(strIn);
+    bool redoInput = true;
+    int rounds = 0;
 
-    addstr("\npress any key to start...");
-    curs_set(0);
-    refresh();
-    getch();
+    while (redoInput == true) {
+        curs_set(1);
+        addstr("enter the number of rounds you want to play\nin a three-digit format (i.e 005, 042 or 247)     (max = 999)\n");
+        refresh();
+        for (int i = 0; i < 3; i++) {
+            strIn[i] = getch();
+        }
+        strIn[3] = '\0';
+        rounds = atoi(strIn);
+
+        addstr("\npress any key to start...");
+        addstr("\nor r to reinput the number of rounds");
+        curs_set(0);
+        refresh();
+        if (getch() != 'r') redoInput = false;
+        addstr("\n\n");
+    }
     clear();
     curs_set(1);
 
@@ -106,11 +114,11 @@ int main(){
             else currentFail = false;
             overwriteLetters(i, currentFail, word);
         }
-        napms(1000);
+        napms(500);
         if (fail == false) correctCount += 1;
         curs_set(0);
         writeOutcome(fail, correctCount, rounds);
-        napms(500);
+        napms(700);
         clear();
         writeOutcome(fail, correctCount, rounds);
         curs_set(1);
