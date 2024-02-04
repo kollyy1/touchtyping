@@ -118,7 +118,7 @@ int main(){
         if (fail == false) correctCount += 1;
         curs_set(0);
         writeOutcome(fail, correctCount, rounds);
-        napms(700);
+        napms(680);
         clear();
         writeOutcome(fail, correctCount, rounds);
         curs_set(1);
