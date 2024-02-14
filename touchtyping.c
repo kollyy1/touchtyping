@@ -1,10 +1,10 @@
 /*future ideas
     make an end screen
-    make a settings file for settings such as (max) word length, random word length or const, home row or others, default number of rounds (in the input screen could say press d for default) etc
+    make a settings file for settings such as (max) word length, random word length or const, home row or others, default number of rounds (in the input screen could say press d for default) etc.
     put things into discrete functions
     change the amount correct display to reflect correct characters instead of words
     add a words mode (using linux standard dictionary? or c dictionary library??) - put in settings??
-    add a speed evaluator???
+    add a speed evaluator????
  */
 
 #include <time.h>
