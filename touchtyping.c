@@ -33,6 +33,7 @@ void writeOutcome(bool fail, int correctCount, int rounds){
     refresh();
 }
 
+// rewrites letters with a coloured background
 void overwriteLetters(int currentL, bool fail, char* word){
     int colour;
     if (fail == true) colour = 2;
@@ -42,6 +43,54 @@ void overwriteLetters(int currentL, bool fail, char* word){
     addch(word[currentL]);
     attroff(COLOR_PAIR(colour));
     move(2,currentL+1);
+    refresh();
+}
+
+// returns number of rounds inputted
+int writeIntroScreen(){
+    addstr("---------------------------\n|     Asher's amazing     |\n"
+           "| touch-typing challenge! |\n---------------------------\n\n");
+    char strIn[4];
+    bool redoInput = true;
+    int rounds;
+
+    while (redoInput == true) {
+        curs_set(1);
+        addstr("enter the number of rounds you want to play\nin a three-digit format (i.e 005, 042 or 247)     (max = 999)\nor q to quit\n");
+        refresh();
+        for (int i = 0; i < 3; i++) {
+            strIn[i] = getch();
+            if (strIn[i] == 'q'){
+                return 0;
+            }
+        }
+        strIn[3] = '\0';
+        rounds = atoi(strIn);
+
+        addstr("\npress any key to start...");
+        addstr("\nor r to reinput the number of rounds");
+        curs_set(0);
+        refresh();
+        if (getch() != 'r') redoInput = false;
+        addstr("\n\n");
+    }
+    clear();
+    curs_set(1);
+
+    move(4, 13);
+    printw("0/%d correct",rounds);
+    return rounds;
+}
+
+void writeEndScreen(int roundsCorrect, int rounds){
+    char winMessage[25];
+    if (roundsCorrect >= rounds * 0.8) strcpy(winMessage, "AMAZING!");
+    else if (roundsCorrect >= rounds * 0.5) strcpy(winMessage ,"Well Done!");
+    else if (roundsCorrect >= rounds * 0.3) strcpy(winMessage, "Better Luck Next Time!");
+    else strcpy(winMessage, "Oh Dear...");
+    clear();
+    printw("---------------\n|  Game Over  |\n---------------\n\n"
+           "%s\nyou got %d out of %d right",winMessage, roundsCorrect, rounds);
     refresh();
 }
 
@@ -59,34 +108,7 @@ int main(){
     int correctCount = 0;
 
     //intro screen
-    addstr("---------------------------\n|     Asher's amazing     |\n"
-           "| touch-typing challenge! |\n---------------------------\n\n");
-    char strIn[4];
-    bool redoInput = true;
-    int rounds = 0;
-
-    while (redoInput == true) {
-        curs_set(1);
-        addstr("enter the number of rounds you want to play\nin a three-digit format (i.e 005, 042 or 247)     (max = 999)\n");
-        refresh();
-        for (int i = 0; i < 3; i++) {
-            strIn[i] = getch();
-        }
-        strIn[3] = '\0';
-        rounds = atoi(strIn);
-
-        addstr("\npress any key to start...");
-        addstr("\nor r to reinput the number of rounds");
-        curs_set(0);
-        refresh();
-        if (getch() != 'r') redoInput = false;
-        addstr("\n\n");
-    }
-    clear();
-    curs_set(1);
-
-    move(4, 13);
-    printw("0/%d correct",rounds);
+    int rounds = writeIntroScreen();
 
     // main loop for touchtyping tests
     for(int i = 0; i < rounds; i++){
@@ -125,10 +147,8 @@ int main(){
     }
 
     // end screen
-
-
-
-    napms(2000);
+    writeEndScreen(correctCount, rounds);
+    napms(4000);
     flushinp();
     endwin();
     return 0;
