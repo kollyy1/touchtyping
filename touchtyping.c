@@ -84,7 +84,7 @@ int writeIntroScreen(){
     return rounds;
 }
 
-//returns whether player has quitted
+//returns whether player has quit
 bool writeEndScreen(int roundsCorrect, int rounds){
     bool isEnding = false;
     char winMessage[25];
@@ -104,6 +104,48 @@ bool writeEndScreen(int roundsCorrect, int rounds){
     return isEnding;
 }
 
+//returns number of correct rounds
+int runTouchtypingTests(char* charSet, int rounds){
+    int correctCount = 0;
+    bool fail;
+    bool currentFail;
+    char input;
+    for (int i = 0; i < rounds; i++) {
+        int length = (rand() % 8 + 1);
+        char word[length + 1];
+        for (int i = 0; i < length; i++) {
+            word[i] = charSet[rand() % 10];
+        }
+        word[length] = '\0';
+        fail = false;
+        move(0, 0);
+        printw("%d.", i + 1);
+
+        move(1, 0);
+        addstr(word);
+        move(2, 0);
+        flushinp();
+        refresh();
+        for (int i = 0; i < length; i++) {
+            input = getch();
+            if (word[i] != input) {
+                fail = true;
+                currentFail = true;
+            } else currentFail = false;
+            overwriteLetters(i, currentFail, word);
+        }
+        napms(500);
+        if (fail == false) correctCount += 1;
+        curs_set(0);
+        writeOutcome(fail, correctCount, rounds);
+        napms(680);
+        clear();
+        writeOutcome(fail, correctCount, rounds);
+        curs_set(1);
+    }
+    return correctCount;
+}
+
 int main(){
 
     initscr();
@@ -112,14 +154,9 @@ int main(){
     init_pair(2, COLOR_WHITE, COLOR_RED);
     srand(time(NULL));
     char homerowChars[10] = {'a','s','d','f','g','h','j','k','l',';'};
-    char input;
-    bool fail;
-    bool currentFail;
     bool isEnding = false;
 
     while (isEnding == false) {
-        int correctCount = 0;
-
         //intro screen
         int rounds = writeIntroScreen();
         if (rounds == -1){
@@ -129,39 +166,7 @@ int main(){
         }
 
         // main loop for touchtyping tests
-        for (int i = 0; i < rounds; i++) {
-            int length = (rand() % 8 + 1);
-            char word[length + 1];
-            for (int i = 0; i < length; i++) {
-                word[i] = homerowChars[rand() % 10];
-            }
-            word[length] = '\0';
-            fail = false;
-            move(0, 0);
-            printw("%d.", i + 1);
-
-            move(1, 0);
-            addstr(word);
-            move(2, 0);
-            flushinp();
-            refresh();
-            for (int i = 0; i < length; i++) {
-                input = getch();
-                if (word[i] != input) {
-                    fail = true;
-                    currentFail = true;
-                } else currentFail = false;
-                overwriteLetters(i, currentFail, word);
-            }
-            napms(500);
-            if (fail == false) correctCount += 1;
-            curs_set(0);
-            writeOutcome(fail, correctCount, rounds);
-            napms(680);
-            clear();
-            writeOutcome(fail, correctCount, rounds);
-            curs_set(1);
-        }
+        int correctCount = runTouchtypingTests(homerowChars, rounds);
 
         // end screen
         isEnding = writeEndScreen(correctCount, rounds);
