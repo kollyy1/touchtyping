@@ -47,7 +47,9 @@ void overwriteLetters(int currentL, bool fail, char* word){
 }
 
 // returns number of rounds inputted
+// returns -1 if user quits
 int writeIntroScreen(){
+    clear();
     addstr("---------------------------\n|     Asher's amazing     |\n"
            "| touch-typing challenge! |\n---------------------------\n\n");
     char strIn[4];
@@ -61,7 +63,7 @@ int writeIntroScreen(){
         for (int i = 0; i < 3; i++) {
             strIn[i] = getch();
             if (strIn[i] == 'q'){
-                return 0;
+                return -1;
             }
         }
         strIn[3] = '\0';
@@ -82,16 +84,24 @@ int writeIntroScreen(){
     return rounds;
 }
 
-void writeEndScreen(int roundsCorrect, int rounds){
+//returns whether player has quitted
+bool writeEndScreen(int roundsCorrect, int rounds){
+    bool isEnding = false;
     char winMessage[25];
     if (roundsCorrect >= rounds * 0.8) strcpy(winMessage, "AMAZING!");
     else if (roundsCorrect >= rounds * 0.5) strcpy(winMessage ,"Well Done!");
     else if (roundsCorrect >= rounds * 0.3) strcpy(winMessage, "Better Luck Next Time!");
     else strcpy(winMessage, "Oh Dear...");
     clear();
+    curs_set(0);
+    flushinp();
     printw("---------------\n|  Game Over  |\n---------------\n\n"
-           "%s\nyou got %d out of %d right",winMessage, roundsCorrect, rounds);
+           "%s\nyou got %d out of %d right\n\n\n",winMessage, roundsCorrect, rounds);
+    addstr("press any key to try again or q to quit");
+    if (getch() == 'q') isEnding = true;
     refresh();
+    curs_set(1);
+    return isEnding;
 }
 
 int main(){
@@ -105,51 +115,58 @@ int main(){
     char input;
     bool fail;
     bool currentFail;
-    int correctCount = 0;
+    bool isEnding = false;
 
-    //intro screen
-    int rounds = writeIntroScreen();
+    while (isEnding == false) {
+        int correctCount = 0;
 
-    // main loop for touchtyping tests
-    for(int i = 0; i < rounds; i++){
-        int length = (rand() %8 + 1);
-        char word[length+1];
-        for (int i = 0; i < length; i++){
-            word[i] = homerowChars[rand() % 10];
+        //intro screen
+        int rounds = writeIntroScreen();
+        if (rounds == -1){
+            flushinp();
+            endwin();
+            return 0;
         }
-        word[length] = '\0';
-        fail = false;
-        move(0,0);
-        printw("%d.", i+1);
 
-        move(1, 0);
-        addstr(word);
-        move(2, 0);
-        flushinp();
-        refresh();
-        for(int i = 0; i < length; i++) {
-            input = getch();
-            if (word[i] != input) {
-                fail = true;
-                currentFail = true;
+        // main loop for touchtyping tests
+        for (int i = 0; i < rounds; i++) {
+            int length = (rand() % 8 + 1);
+            char word[length + 1];
+            for (int i = 0; i < length; i++) {
+                word[i] = homerowChars[rand() % 10];
             }
-            else currentFail = false;
-            overwriteLetters(i, currentFail, word);
-        }
-        napms(500);
-        if (fail == false) correctCount += 1;
-        curs_set(0);
-        writeOutcome(fail, correctCount, rounds);
-        napms(680);
-        clear();
-        writeOutcome(fail, correctCount, rounds);
-        curs_set(1);
-    }
+            word[length] = '\0';
+            fail = false;
+            move(0, 0);
+            printw("%d.", i + 1);
 
-    // end screen
-    writeEndScreen(correctCount, rounds);
-    napms(4000);
-    flushinp();
+            move(1, 0);
+            addstr(word);
+            move(2, 0);
+            flushinp();
+            refresh();
+            for (int i = 0; i < length; i++) {
+                input = getch();
+                if (word[i] != input) {
+                    fail = true;
+                    currentFail = true;
+                } else currentFail = false;
+                overwriteLetters(i, currentFail, word);
+            }
+            napms(500);
+            if (fail == false) correctCount += 1;
+            curs_set(0);
+            writeOutcome(fail, correctCount, rounds);
+            napms(680);
+            clear();
+            writeOutcome(fail, correctCount, rounds);
+            curs_set(1);
+        }
+
+        // end screen
+        isEnding = writeEndScreen(correctCount, rounds);
+        flushinp();
+    }
     endwin();
     return 0;
 }
